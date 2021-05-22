@@ -1,0 +1,14 @@
+{
+  "name": "paypal-scrape",
+  "version": "1.0.0",
+  "description": "",
+  "main": "paypal-parse.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "htmldom": "^4.0.11"
+  }
+}
