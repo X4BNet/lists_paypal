@@ -24,7 +24,14 @@ jobs:
         cd ./helpers && npm install && cd ..
     - name: Scrape paypal IP list
       run: |
-        curl https://www.paypal.com/us/smarthelp/article/what-are-the-ip-addresses-for-live-paypal-servers-ts1056 | node ./helpers/paypal-parse.js > /tmp/paypal.lsv
+        echo "" > /tmp/paypal.lsv
+        while [[ $(wc -l /tmp/paypal.lsv) -lt 2 ]]; do
+          curl https://www.paypal.com/us/smarthelp/article/what-are-the-ip-addresses-for-live-paypal-servers-ts1056 | node ./helpers/paypal-parse.js > /tmp/paypal.lsv
+          if [[ $(wc -l /tmp/paypal.lsv) -gt 2 ]]; then
+            exit 0
+          fi
+          sleep 3
+        done
     - name: Build list
       run: |
         perl ./helpers/cleanup.pl /tmp/paypal.lsv > ipv4.txt
@@ -39,9 +46,9 @@ jobs:
           exit 1
         fi
 
-        ips_covered=$(awk -F/ 'BEGIN{a=0}{if($2==""){a+1}else{a+=2^(32-$2)}}END{print a}' ipv4.txt)
+        ips_covered=$(awk -F/ 'BEGIN{a=0}{if($2==""){a+=1}else{a+=2^(32-$2)}}END{print a}' ipv4.txt)
         if [[ "$ips_covered" -lt 8000 ]]; then
-          echo "Too few addresses covered"
+          echo "Too few ($ips_covered) addresses covered"
           exit 1
         fi
         if [[ "$ips_covered" -gt 20000 ]]; then
